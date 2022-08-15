@@ -10,7 +10,7 @@ function App() {
   return (
     <>
       <Nav />
-      <Suspense>
+      <Suspense fallback={<p style={{textAlign: 'center'}}>Loading...</p>}>
         <Routes>          
           <Route path='/' element={<Navigate to='/react' />} />
           <Route path='/:framework' element={<Framework />} />                      
