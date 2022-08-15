@@ -1,0 +1,16 @@
+.list-container {
+  display: flex;
+  gap: 15px;
+  flex-direction: row;
+  flex-wrap: wrap;
+  justify-content: center;
+}
+select {
+  width: 200px;
+  height: 30px;
+  font-size: 18px;
+  background-color: transparent;
+  border: 1px solid var(--color-primary-2);
+  color: var(--color-primary-2);
+  margin-bottom: 20px;
+}
