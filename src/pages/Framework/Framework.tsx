@@ -1,5 +1,6 @@
 import React, { ChangeEvent, useEffect, useState } from 'react'
 import { useParams, useSearchParams } from 'react-router-dom'
+import { useSelector, useDispatch } from 'react-redux'
 
 import { getRepos } from '../../api'
 import Pagination from '../../components/Pagination'
@@ -7,13 +8,17 @@ import Skeleton from '../../components/Skeleton'
 import Card from '../../components/Card'
 import { IFramework, IRepository } from '../../common/types'
 import './style.css'
+import { setRepos } from '../../store/actions'
 
 const Framework = () => {  
+
+  const repos = useSelector((state: IFramework) => state);
+  const dispatch = useDispatch();
+
   const { framework = 'react' } = useParams()
   const [searchParams, setSearchParams] = useSearchParams()
 
-  const [loading, setLoading] = useState(false)
-  const [repos, setRepos] = useState<IFramework>({ items: [], totalCount: 0 })
+  const [loading, setLoading] = useState(false)  
   const [sorting, setSorting] = useState('0')
   const [errorMessage, setErrorMessage] = useState(null)
 
@@ -41,7 +46,7 @@ const Framework = () => {
         sort,
         order,
       })
-      setRepos({ items, totalCount })
+      dispatch(setRepos({items, totalCount}))
     } catch (error: any) {
       setErrorMessage(error?.message)
     } finally {
