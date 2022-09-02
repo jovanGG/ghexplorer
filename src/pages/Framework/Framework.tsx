@@ -1,5 +1,6 @@
-import React, { ChangeEvent, useEffect, useState } from 'react'
+import React, { useEffect, useState } from 'react'
 import { useParams, useSearchParams } from 'react-router-dom'
+import { useSelector, useDispatch } from 'react-redux'
 
 import { getRepos } from '../../api'
 import Pagination from '../../components/Pagination'
@@ -7,13 +8,17 @@ import Skeleton from '../../components/Skeleton'
 import Card from '../../components/Card'
 import { IFramework, IRepository } from '../../common/types'
 import './style.css'
+import { setRepos } from '../../store/actions'
+import Filter from '../../components/Filter'
 
-const Framework = () => {  
+const Framework = () => {
+  const repos = useSelector((state: IFramework) => state)
+  const dispatch = useDispatch()
+
   const { framework = 'react' } = useParams()
   const [searchParams, setSearchParams] = useSearchParams()
 
   const [loading, setLoading] = useState(false)
-  const [repos, setRepos] = useState<IFramework>({ items: [], totalCount: 0 })
   const [sorting, setSorting] = useState('0')
   const [errorMessage, setErrorMessage] = useState(null)
 
@@ -24,12 +29,7 @@ const Framework = () => {
 
   const getAllSearchParams = Object.fromEntries([...searchParams])
 
-  const options: { [key: string]: object } = {
-    '1': { sort: 'stars', order: 'desc' },
-    '2': { sort: 'stars', order: 'asc' },
-    '3': { sort: 'forks', order: 'desc' },
-    '4': { sort: 'forks', order: 'asc' },
-  }
+  const filterProps = { sorting, setSorting, searchParams, setSearchParams }
 
   const loadRepos = async () => {
     setLoading(true)
@@ -41,7 +41,7 @@ const Framework = () => {
         sort,
         order,
       })
-      setRepos({ items, totalCount })
+      dispatch(setRepos({ items, totalCount }))
     } catch (error: any) {
       setErrorMessage(error?.message)
     } finally {
@@ -56,14 +56,6 @@ const Framework = () => {
     })
   }
 
-  const handleOptions = (event: ChangeEvent<HTMLSelectElement>) => {
-    setSorting(event.target.value)
-    setSearchParams({
-      ...getAllSearchParams,
-      ...options[event.target.value],
-    })
-  }
-
   useEffect(() => {
     loadRepos()
   }, [framework, page, perPage, sort, order])
@@ -74,13 +66,7 @@ const Framework = () => {
 
   return (
     <div className='main-wrapper'>
-      <select value={sorting} placeholder='Sort' onChange={handleOptions}>
-        <option value='0'>Sort</option>
-        <option value='1'>Most stars</option>
-        <option value='2'>Least stars</option>
-        <option value='3'>Most forks</option>
-        <option value='4'>Least forks</option>
-      </select>
+      <Filter {...filterProps} />
       {loading ? (
         <Skeleton count={30} />
       ) : errorMessage ? (
@@ -91,7 +77,12 @@ const Framework = () => {
         </div>
       )}
       {errorMessage ? null : (
-        <Pagination total={repos.totalCount} limit={parseInt(perPage)} currentPage={parseInt(page)} onPageChange={onPageChange} />
+        <Pagination
+          total={repos.totalCount}
+          limit={parseInt(perPage)}
+          currentPage={parseInt(page)}
+          onPageChange={onPageChange}
+        />
       )}
     </div>
   )
